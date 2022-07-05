@@ -1,0 +1,10 @@
+version: '3'
+services:
+  test:
+    image: fast-api-sample_app
+    volumes:
+      - "../:/root"
+    environment:
+        - PYTHONPATH=/root/app
+    working_dir: /root
+    command: ["python3", "-m", "pytest", "--cov=app", "tests"]
