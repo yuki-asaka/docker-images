@@ -9,6 +9,7 @@ The authentication screen template has been slightly modified.
 
 In addition, static files that can be used throughout the project have been configured.
 
+Also, we have changed the log settings.
 
 ## Usage
 
