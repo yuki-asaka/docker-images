@@ -23,9 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-_@_qtu$#irqco_k_)xw72=_u7=i%)&g1*(d^*lfix0rit$1k01'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -48,6 +48,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'composeexample.middleware.CustomErrorHandlerMiddleware',
+    'composeexample.middleware.TimeMiddleware',
 ]
 
 ROOT_URLCONF = 'composeexample.urls'
@@ -133,3 +135,40 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # additional setting
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'home'
+
+
+# override logging config: https://docs.djangoproject.com/en/4.1/topics/logging/#django.utils.log.DEFAULT_LOGGING
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "django.server": {
+            "()": "django.utils.log.ServerFormatter",
+            "format": "[{asctime}] {message}",
+            "datefmt": "%Y-%m-%dT%H:%M:%S%z",
+            "style": "{",
+        }
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "django.server",
+        },
+    },
+    "loggers": {
+        # for logging error in django server
+        "django.server": {
+            "handlers": ["console"],
+            "level": "ERROR",
+        },
+        # for logging response time
+        "composeexample.middleware": {
+            "handlers": ["console"],
+            "level": "INFO",
+        },
+    },
+    # "root": {
+    #     "handlers": ["console"],
+    #     "level": "INFO",
+    # },
+}
