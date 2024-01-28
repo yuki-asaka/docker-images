@@ -1,0 +1,72 @@
+admin:
+  address:
+    socket_address:
+      address: 127.0.0.1
+      port_value: 9901
+static_resources:
+  listeners:
+    - name: listener_0
+      address:
+        socket_address:
+          address: 0.0.0.0
+          port_value: 10000
+      filter_chains:
+      - filters:
+        - name: envoy.filters.network.http_connection_manager
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+            stat_prefix: ingress_http
+            http_filters:
+              - name: envoy.filters.http.router
+                typed_config:
+                  "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
+            route_config:
+              name: local_route
+              virtual_hosts:
+                - name: local_service
+                  domains: [ "*" ]
+                  routes:
+                  - match:
+                      prefix: "/server_info"
+                    route:
+                      cluster: envoy_admin
+                  - match:
+                      prefix: "/"
+                    route:
+                      cluster: cls_fastapi
+
+  clusters:
+    - name: cls_fastapi
+      connect_timeout: 0.25s
+      type: STRICT_DNS
+      dns_lookup_family: V4_ONLY
+      lb_policy: ROUND_ROBIN
+      load_assignment:
+        cluster_name: cls_fastapi
+        endpoints:
+          - lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address:
+                    address: fastapi
+                    port_value: 8000
+    - name: envoy_admin
+      connect_timeout: 0.25s
+      type: LOGICAL_DNS
+      lb_policy: ROUND_ROBIN
+      load_assignment:
+        cluster_name: cls_admin
+        endpoints:
+          - lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address:
+                    address: 127.0.0.1
+                    port_value: 9901
+      # 間違ってる https://blog.chaspy.me/entry/2020/01/05/120000 と同じにはならない
+      # listner で設定した address port で外向けに待ち受けて中の cluster とつなぐ
+#      hosts:
+#        - socket_address:
+#            protocol: TCP
+#            address: 127.0.0.1
+#            port_value: 9901
