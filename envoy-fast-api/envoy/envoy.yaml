@@ -63,10 +63,3 @@ static_resources:
                   socket_address:
                     address: 127.0.0.1
                     port_value: 9901
-      # 間違ってる https://blog.chaspy.me/entry/2020/01/05/120000 と同じにはならない
-      # listner で設定した address port で外向けに待ち受けて中の cluster とつなぐ
-#      hosts:
-#        - socket_address:
-#            protocol: TCP
-#            address: 127.0.0.1
-#            port_value: 9901
